@@ -4,7 +4,9 @@ import glob
 import openpyxl
 import csv
 import os
+import shutil
 import os.path
+import uuid
 from openpyxl import load_workbook
 from openpyxl.chart import LineChart, PieChart, BarChart, Reference, Series
 from openpyxl.formatting.rule import ColorScaleRule
@@ -24,15 +26,16 @@ SUM_CUBE_AUTON = 109
 SUM_CONE_TELEOP = 110
 SUM_CUBE_TELEOP = 111
 
+FILE_NAME = "./scouting_app_data_interface.xlsx"
 tablet_data = glob.glob("./data_dump/*")
-book = openpyxl.load_workbook("./scouting_app_data_interface.xlsx")
+book = openpyxl.load_workbook(FILE_NAME)
 
 def create_new_sheet(list_of_elem, sheet):
     #makes the data into a dataframe to place inside of sheet
     df_list = pd.DataFrame([list_of_elem])
     
     #initializes sheet to write in so we can do the thing
-    writer = pd.ExcelWriter("./scouting_app_data_interface.xlsx", engine = 'openpyxl')
+    writer = pd.ExcelWriter(FILE_NAME, engine = 'openpyxl')
     writer.book = book
     
     #makes new worksheet within workbook with dataframe as data
@@ -45,7 +48,7 @@ def create_new_sheet(list_of_elem, sheet):
     writer.save()
     
     
-    writer = pd.ExcelWriter("./scouting_app_data_interface.xlsx", engine = 'openpyxl')
+    writer = pd.ExcelWriter(FILE_NAME, engine = 'openpyxl')
     writer.book = book
 
 
@@ -169,7 +172,7 @@ def create_new_sheet(list_of_elem, sheet):
 
 def append_existing_sheet(list_of_elem, sheet):
     df_list = pd.DataFrame([list_of_elem])
-    writer = pd.ExcelWriter("./scouting_app_data_interface.xlsx", engine='openpyxl')
+    writer = pd.ExcelWriter(FILE_NAME, engine='openpyxl')
     writer.book = book
     sheets = {ws.title: ws for ws in book.worksheets}
     
@@ -207,6 +210,7 @@ def writeToTeamFile(tablet_data):
   """
   Creates a sheet in the excel workbook for each team scouted OR adds data to an existing file.
   """
+  shutil.copy(FILE_NAME, f'./full_backups/{uuid.uuid4()}.xlsx')
   for data in tablet_data:
     print(f"Processing file {data}")
     with open(data, newline='') as csvfile:
