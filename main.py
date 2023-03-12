@@ -3,9 +3,13 @@ import pandas as pd
 import glob
 import openpyxl
 import csv
+import os
+import os.path
 from openpyxl import load_workbook
 from openpyxl.chart import LineChart, PieChart, BarChart, Reference, Series
 from openpyxl.formatting.rule import ColorScaleRule
+
+
 NUM_MATCHES = 99
 SUM_COMMUNITY = 100
 SUM_NO_COMMUNITY = 101
@@ -36,6 +40,8 @@ def create_new_sheet(list_of_elem, sheet):
         df_list.to_excel(writer, sheet_name = sheet, index = False, header=["Name", "Match", "Team", "Tablet", "community", "gamepiece-type", "gamepiece-type3", "auton-upper-node-count",     "auton-middle-node-count", "auton-lower-node-count", "dock", "engage", "neither", "telop-upper-node-count", "telop-middle-node-count", "telop-lower-node-count", "gamepiece-type4", "gamepiece-type5", "foul-count", "yes defense", "no defense", "defense", "dock2", "engage2", "neither2", "yesbreak", "nobreak", "comments", "empty"])
     except:
         print("\n ERROR doing " + sheet)
+        return
+        
     writer.save()
     
     
@@ -201,24 +207,28 @@ def writeToTeamFile(tablet_data):
   """
   Creates a sheet in the excel workbook for each team scouted OR adds data to an existing file.
   """
-  for i in tablet_data:
-    print(i)
-    with open(i, newline='') as csvfile:
+  for data in tablet_data:
+    print(f"Processing file {data}")
+    with open(data, newline='') as csvfile:
         reader = csv.reader(csvfile)
         list_of_elem = next(reader)
-    print(list_of_elem)
     for i in range (4,27):
         list_of_elem[i] = int(list_of_elem[i])
     try:
-        append_existing_sheet(list_of_elem, list_of_elem[2])
-        append_existing_sheet(list_of_elem, "All Data")
+        try:
+            append_existing_sheet(list_of_elem, list_of_elem[2])
+            append_existing_sheet(list_of_elem, "All Data")
+        except:
+            create_new_sheet(list_of_elem, list_of_elem[2])
+            append_existing_sheet(list_of_elem, "All Data")
+        newfile = "./backup/" + os.path.basename(data)
+        os.rename(data, newfile)
     except:
-        create_new_sheet(list_of_elem, list_of_elem[2])
-        append_existing_sheet(list_of_elem, "All Data")
+        newfile = "./bad_data/" + os.path.basename(data)
+        os.rename(data, newfile)
 
 writeToTeamFile(tablet_data)
 #appendAverages()
-print("hi")
 
 #"""This is to print out one of the dataframes to see if everything is in order"""
 #print(pd.read_csv("team_data/2607.csv", names=["MATCH_NUM", "SCOUTER_NAME", "TEAM_NUM", "AUTON_UPPER", "AUTON_LOWER", "TELEOP_UPPER", "TELEOP_LOWER", "ENDGAME_CLIMB", "COMMENTS", "TARMAC_Y/N", "FENDER_Y/N", "LAUNCH PAD_Y/N", "TERMINAL_Y/N", "MID-FIELD_Y/N", "TDEFENSE_Y/N", "TDEFENDED_Y/N", "PHP_Y/N", "PGROUND_Y/N", "EDEFENSE", "ESCORE"]))
