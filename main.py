@@ -225,10 +225,10 @@ def writeToTeamFile(tablet_data):
         except:
             create_new_sheet(list_of_elem, list_of_elem[2])
             append_existing_sheet(list_of_elem, "All Data")
-        newfile = "./backup/" + os.path.basename(data)
+        newfile = f'./backup/{uuid.uuid4()}_{os.path.basename(data)}'
         os.rename(data, newfile)
     except:
-        newfile = "./bad_data/" + os.path.basename(data)
+        newfile = f'./bad_data/{uuid.uuid4()}_{os.path.basename(data)}'
         os.rename(data, newfile)
 
 writeToTeamFile(tablet_data)
